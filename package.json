@@ -1,0 +1,28 @@
+{
+  "name": "hal-walk",
+  "version": "1.0.0",
+  "description": "CLI tool for exploring HAL APIs via HATEOAS link-following",
+  "type": "module",
+  "bin": {
+    "hal-walk": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "prepublishOnly": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "uri-templates": "^0.2.0",
+    "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
