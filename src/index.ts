@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { Command } from 'commander';
 import { startCommand } from './commands/start.js';
 import { followCommand } from './commands/follow.js';
@@ -10,12 +13,15 @@ import { renderCommand } from './commands/render.js';
 import { exportCommand } from './commands/export.js';
 import { sessionViewerCommand } from './commands/session-viewer.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+
 const program = new Command();
 
 program
   .name('hal-walk')
   .description('CLI tool for exploring HAL APIs via HATEOAS link-following')
-  .version('1.0.0');
+  .version(pkg.version);
 
 program
   .command('start')
