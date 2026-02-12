@@ -12,7 +12,7 @@ import { exportCommand } from './commands/export.js';
 const program = new Command();
 
 program
-  .name('hal')
+  .name('hal-walk')
   .description('CLI tool for exploring HAL APIs via HATEOAS link-following')
   .version('1.0.0');
 
