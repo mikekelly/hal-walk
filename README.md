@@ -46,7 +46,7 @@ Shows the current position, the stored HAL response, and all available link rela
 ### Read relation documentation
 
 ```bash
-npx hal-walk describe -s session.json wiki:create-page
+npx hal-walk describe -s session.json wiki:v1:create-page
 ```
 
 Expands the CURIE and fetches the relation's documentation — a markdown file describing the method, input schema, and expected response. This is what the agent reads to figure out how to use a link.
@@ -55,21 +55,21 @@ Expands the CURIE and fetches the relation's documentation — a markdown file d
 
 ```bash
 # GET (default)
-npx hal-walk follow -s session.json wiki:pages \
+npx hal-walk follow -s session.json wiki:v1:pages \
   --note "List all pages to see what exists"
 
 # POST with body and schema (method inferred from --body)
-npx hal-walk follow -s session.json wiki:create-page \
+npx hal-walk follow -s session.json wiki:v1:create-page \
   --body '{"title": "My Page", "body": "Content here"}' \
   --body-schema '{"type":"object","properties":{"title":{"type":"string","description":"Page title"},"body":{"type":"string","description":"Page content (markdown)"}},"required":["title","body"]}' \
   --note "Create a new wiki page"
 
 # Templated link with URI template values
-npx hal-walk follow -s session.json wiki:version \
+npx hal-walk follow -s session.json wiki:v1:version \
   --uri-template-values '{"vid": "2"}'
 
 # Explicit method override
-npx hal-walk follow -s session.json wiki:edit-page \
+npx hal-walk follow -s session.json wiki:v1:edit-page \
   --method PUT \
   --body '{"body": "Updated content"}' \
   --note "Update page body with corrections"
@@ -101,8 +101,8 @@ graph LR
   p1["/\n(p1)"]
   p2["/pages\n(p2)"]
   p3["/pages\n(p3)"]
-  p1 -->|"wiki:pages\nGET"| p2
-  p2 -->|"wiki:create-page\nPOST"| p3
+  p1 -->|"wiki:v1:pages\nGET"| p2
+  p2 -->|"wiki:v1:create-page\nPOST"| p3
 ```
 
 ### Export a deterministic path spec
@@ -122,12 +122,12 @@ Extracts the shortest path between two positions and outputs a declarative workf
     { "id": "step1", "action": "start", "url": "/" },
     {
       "id": "step2", "action": "follow", "from": "step1",
-      "relation": "wiki:pages", "method": "GET",
+      "relation": "wiki:v1:pages", "method": "GET",
       "note": "List all pages to see what exists"
     },
     {
       "id": "step3", "action": "follow", "from": "step2",
-      "relation": "wiki:create-page", "method": "POST",
+      "relation": "wiki:v1:create-page", "method": "POST",
       "note": "Create a new wiki page",
       "input": {
         "body": { "title": "My Page", "body": "Content" },
@@ -168,7 +168,7 @@ The session is a JSON file representing a directed multigraph:
 
 - **Positions** — nodes in the graph, each storing the URL, HTTP method, status code, and full HAL response
 - **Transitions** — directed edges labeled with the link relation, method, and any input data
-- **CURIEs** — stored from the root response so the CLI can expand `wiki:pages` to its documentation URL throughout the session
+- **CURIEs** — stored from the root response so the CLI can expand `wiki:v1:pages` to its documentation URL throughout the session
 
 The graph structure means the agent can explore branching paths (via `goto` to revisit earlier positions) and the export can find optimal paths through BFS.
 
