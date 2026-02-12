@@ -58,9 +58,17 @@ export function exportCommand(
           method: transition.method,
         };
 
-        if (transition.input) {
-          step.input = { data: transition.input };
+        if (transition.note) {
+          step.note = transition.note;
         }
+
+        const input: PathStep['input'] = {};
+        if (transition.uriTemplateValues) input.uriTemplateValues = transition.uriTemplateValues;
+        if (transition.body !== undefined) input.body = transition.body;
+        if (transition.bodySchema) input.bodySchema = transition.bodySchema;
+        if (transition.headers) input.headers = transition.headers;
+        if (transition.headerSchema) input.headerSchema = transition.headerSchema;
+        if (Object.keys(input).length > 0) step.input = input;
 
         steps.push(step);
       }
@@ -70,7 +78,7 @@ export function exportCommand(
   const pathSpec: PathSpec = {
     name: 'exported-path',
     description: `Path from ${fromId} to ${toId}`,
-    baseUrl: session.baseUrl,
+    entryPoint: session.entryPoint,
     steps,
   };
 

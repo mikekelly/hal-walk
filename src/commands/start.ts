@@ -18,7 +18,7 @@ export async function startCommand(sessionFile: string, url: string): Promise<vo
   const session: Session = {
     id: uuid(),
     startedAt: new Date().toISOString(),
-    baseUrl: url.replace(/\/$/, ''),
+    entryPoint: url.replace(/\/$/, ''),
     curies,
     currentPosition: 'p1',
     positions: {

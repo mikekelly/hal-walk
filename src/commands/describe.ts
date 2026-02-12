@@ -15,7 +15,7 @@ export async function describeCommand(sessionFile: string, relation: string): Pr
 
   // Ensure it's an absolute URL
   if (!docUrl.startsWith('http://') && !docUrl.startsWith('https://')) {
-    docUrl = `${session.baseUrl}${docUrl.startsWith('/') ? '' : '/'}${docUrl}`;
+    docUrl = `${session.entryPoint}${docUrl.startsWith('/') ? '' : '/'}${docUrl}`;
   }
 
   const result = await fetchHal(docUrl);

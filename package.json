@@ -16,6 +16,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
     "commander": "^12.1.0",
     "uri-templates": "^0.2.0",
     "uuid": "^11.0.0"

@@ -23,12 +23,6 @@ Traditional API clients need complete knowledge upfront — an OpenAPI spec, a c
 
 The agent never needs a complete map of the API. It discovers capabilities incrementally, just like a human clicking through a website. The difference is that every click is recorded, and the recording can be compiled into a repeatable workflow.
 
-## Installation
-
-```bash
-npm install
-```
-
 ## Usage
 
 All commands output JSON to stdout (except `describe`, which outputs markdown, and `render`, which outputs Mermaid). Errors go to stderr.
@@ -36,7 +30,7 @@ All commands output JSON to stdout (except `describe`, which outputs markdown, a
 ### Start a session
 
 ```bash
-npx hal-walk start -s session.json http://localhost:3000/
+npx hal-walk start -s session.json https://agent-wiki.mikekelly321.workers.dev/
 ```
 
 Fetches the root resource, creates a session file, and stores any CURIE definitions.
@@ -61,20 +55,31 @@ Expands the CURIE and fetches the relation's documentation — a markdown file d
 
 ```bash
 # GET (default)
-npx hal-walk follow -s session.json wiki:pages
+npx hal-walk follow -s session.json wiki:pages \
+  --note "List all pages to see what exists"
 
-# POST with data (method inferred from --data)
+# POST with body and schema (method inferred from --body)
 npx hal-walk follow -s session.json wiki:create-page \
-  --data '{"title": "My Page", "body": "Content here"}'
+  --body '{"title": "My Page", "body": "Content here"}' \
+  --body-schema '{"type":"object","properties":{"title":{"type":"string","description":"Page title"},"body":{"type":"string","description":"Page content (markdown)"}},"required":["title","body"]}' \
+  --note "Create a new wiki page"
 
-# Templated link with variable expansion
+# Templated link with URI template values
 npx hal-walk follow -s session.json wiki:version \
-  --template-vars '{"vid": "2"}'
+  --uri-template-values '{"vid": "2"}'
 
 # Explicit method override
 npx hal-walk follow -s session.json wiki:edit-page \
-  --method PUT --data '{"body": "Updated content"}'
+  --method PUT \
+  --body '{"body": "Updated content"}' \
+  --note "Update page body with corrections"
 ```
+
+The `--body-schema` flag captures the JSON Schema the agent learned from the relation docs (via `describe`). This preserves the contract — required vs optional fields, types, descriptions — in the session log and exported path specs. If omitted, a basic schema is auto-inferred from the body data.
+
+The body is validated against the schema before sending. If they don't match, the command fails with a descriptive error.
+
+The `--note` flag provides a brief, human-readable description of why this step is being taken — semantic breadcrumbs that make the session graph self-documenting.
 
 ### Navigate the session graph
 
@@ -112,17 +117,50 @@ Extracts the shortest path between two positions and outputs a declarative workf
 ```json
 {
   "name": "exported-path",
-  "baseUrl": "http://localhost:3000",
+  "entryPoint": "https://agent-wiki.mikekelly321.workers.dev",
   "steps": [
     { "id": "step1", "action": "start", "url": "/" },
-    { "id": "step2", "action": "follow", "from": "step1", "relation": "wiki:pages", "method": "GET" },
-    { "id": "step3", "action": "follow", "from": "step2", "relation": "wiki:create-page", "method": "POST",
-      "input": { "data": { "title": "My Page", "body": "Content" } } }
+    {
+      "id": "step2", "action": "follow", "from": "step1",
+      "relation": "wiki:pages", "method": "GET",
+      "note": "List all pages to see what exists"
+    },
+    {
+      "id": "step3", "action": "follow", "from": "step2",
+      "relation": "wiki:create-page", "method": "POST",
+      "note": "Create a new wiki page",
+      "input": {
+        "body": { "title": "My Page", "body": "Content" },
+        "bodySchema": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string", "description": "Page title" },
+            "body": { "type": "string", "description": "Page content (markdown)" }
+          },
+          "required": ["title", "body"]
+        }
+      }
+    }
   ]
 }
 ```
 
-This spec contains no ambiguity. A runner reads it and executes each step mechanically — the only hook point is providing input data for steps that need it.
+This spec contains no ambiguity. The `bodySchema` preserves the contract the agent learned during exploration — a developer reading the export can see which fields are required, their types, and descriptions. The `body` is an example. The `note` on each step explains the agent's intent. A runner executes each step mechanically, using the schema to understand the input contract and prompting for values at each step that needs them.
+
+### Inspect the session visually
+
+```bash
+npx hal-walk session-viewer -s session.json
+```
+
+Opens a web UI on a free port showing:
+
+- The session graph rendered with Mermaid (positions as nodes, transitions as edges)
+- Current position highlighted
+- Click a node to inspect the HAL response
+- Click an edge to see the transition details: relation, method, note, URI template values, body schema, body data, headers
+
+Also exposes `GET /api/session` returning the raw session JSON.
 
 ## Session file
 
@@ -140,9 +178,9 @@ An LLM agent operating hal-walk doesn't need prior knowledge of the target API. 
 
 1. **Start** at the root — see what links are available
 2. **Describe** an interesting relation — read the markdown to understand method, input, behavior
-3. **Follow** the relation — provide the right data based on what it read
+3. **Follow** the relation — provide the body schema (from docs), the body data, and a note explaining the intent
 4. **Observe** the response — see new links that weren't visible before
 5. **Repeat** until the task is done
-6. **Export** the successful path — produce a spec that can run without the agent
+6. **Export** the successful path — produce a spec that preserves schemas, example data, and semantic notes
 
 The agent's inference is only needed during exploration. The exported artifact is pure data.

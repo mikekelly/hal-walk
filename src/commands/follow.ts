@@ -9,12 +9,23 @@ import {
 } from '../session.js';
 import { findLink, listRelations } from '../curie.js';
 import { fetchHal, resolveUrl, expandTemplate } from '../hal-client.js';
+import { validateAgainstSchema, inferSchema } from '../schema.js';
 import { HalResponse } from '../types.js';
+
+export interface FollowOptions {
+  body?: string;
+  bodySchema?: string;
+  uriTemplateValues?: string;
+  headers?: string;
+  headerSchema?: string;
+  method?: string;
+  note?: string;
+}
 
 export async function followCommand(
   sessionFile: string,
   relation: string,
-  options: { data?: string; templateVars?: string; method?: string }
+  options: FollowOptions
 ): Promise<void> {
   const session = loadSession(sessionFile);
   const currentPos = getCurrentPosition(session);
@@ -35,25 +46,63 @@ export async function followCommand(
   let href = link.href;
 
   // Expand templated links
-  if (link.templated && options.templateVars) {
-    const vars = JSON.parse(options.templateVars) as Record<string, string>;
-    href = expandTemplate(href, vars);
+  let uriTemplateValues: Record<string, string> | undefined;
+  if (link.templated && options.uriTemplateValues) {
+    uriTemplateValues = JSON.parse(options.uriTemplateValues) as Record<string, string>;
+    href = expandTemplate(href, uriTemplateValues);
   }
 
-  const fullUrl = resolveUrl(session.baseUrl, href);
+  const fullUrl = resolveUrl(session.entryPoint, href);
 
   // Determine method
   let method = options.method?.toUpperCase() || 'GET';
   let body: unknown = undefined;
+  let bodySchema: Record<string, unknown> | undefined;
 
-  if (options.data) {
-    body = JSON.parse(options.data);
+  if (options.body) {
+    body = JSON.parse(options.body);
     if (!options.method) {
       method = 'POST';
     }
+
+    // Schema: explicit or auto-inferred
+    if (options.bodySchema) {
+      bodySchema = JSON.parse(options.bodySchema) as Record<string, unknown>;
+    } else {
+      bodySchema = inferSchema(body);
+    }
+
+    // Validate body against schema
+    try {
+      validateAgainstSchema(body, bodySchema, 'body');
+    } catch (e) {
+      console.error(JSON.stringify({ error: (e as Error).message }));
+      process.exit(1);
+    }
   }
 
-  const result = await fetchHal(fullUrl, { method, body });
+  // Headers
+  let headers: Record<string, string> | undefined;
+  let headerSchema: Record<string, unknown> | undefined;
+
+  if (options.headers) {
+    headers = JSON.parse(options.headers) as Record<string, string>;
+
+    if (options.headerSchema) {
+      headerSchema = JSON.parse(options.headerSchema) as Record<string, unknown>;
+    } else {
+      headerSchema = inferSchema(headers);
+    }
+
+    try {
+      validateAgainstSchema(headers, headerSchema, 'headers');
+    } catch (e) {
+      console.error(JSON.stringify({ error: (e as Error).message }));
+      process.exit(1);
+    }
+  }
+
+  const result = await fetchHal(fullUrl, { method, body, headers });
 
   const posId = nextPositionId(session);
   const transId = nextTransitionId(session);
@@ -73,7 +122,12 @@ export async function followCommand(
     to: posId,
     relation,
     method,
-    ...(body ? { input: body } : {}),
+    ...(options.note ? { note: options.note } : {}),
+    ...(uriTemplateValues ? { uriTemplateValues } : {}),
+    ...(body !== undefined ? { body } : {}),
+    ...(bodySchema ? { bodySchema } : {}),
+    ...(headers ? { headers } : {}),
+    ...(headerSchema ? { headerSchema } : {}),
     timestamp: new Date().toISOString(),
   });
 

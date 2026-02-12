@@ -19,15 +19,19 @@ export interface Transition {
   to: string;
   relation: string;
   method: string;
-  params?: Record<string, string>;
-  input?: unknown;
+  note?: string;
+  uriTemplateValues?: Record<string, string>;
+  body?: unknown;
+  bodySchema?: Record<string, unknown>;
+  headers?: Record<string, string>;
+  headerSchema?: Record<string, unknown>;
   timestamp: string;
 }
 
 export interface Session {
   id: string;
   startedAt: string;
-  baseUrl: string;
+  entryPoint: string;
   curies: CurieDefinition[];
   currentPosition: string;
   positions: Record<string, Position>;
@@ -51,7 +55,7 @@ export interface HalResponse {
 export interface PathSpec {
   name: string;
   description: string;
-  baseUrl: string;
+  entryPoint: string;
   steps: PathStep[];
 }
 
@@ -62,8 +66,12 @@ export interface PathStep {
   from?: string;
   relation?: string;
   method?: string;
+  note?: string;
   input?: {
-    schema?: unknown;
-    data?: unknown;
+    uriTemplateValues?: Record<string, string>;
+    body?: unknown;
+    bodySchema?: Record<string, unknown>;
+    headers?: Record<string, string>;
+    headerSchema?: Record<string, unknown>;
   };
 }

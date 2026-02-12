@@ -8,6 +8,7 @@ import { positionCommand } from './commands/position.js';
 import { gotoCommand } from './commands/goto.js';
 import { renderCommand } from './commands/render.js';
 import { exportCommand } from './commands/export.js';
+import { sessionViewerCommand } from './commands/session-viewer.js';
 
 const program = new Command();
 
@@ -30,10 +31,14 @@ program
   .description('Follow a link relation from the current position')
   .requiredOption('-s, --session <file>', 'Session file path')
   .argument('<relation>', 'Link relation to follow')
-  .option('-d, --data <json>', 'JSON request body')
-  .option('-t, --template-vars <json>', 'JSON template variables for URI expansion')
+  .option('--body <json>', 'JSON request body')
+  .option('--body-schema <json>', 'JSON Schema for the request body')
+  .option('--uri-template-values <json>', 'JSON template variables for URI expansion')
+  .option('--headers <json>', 'JSON object of custom request headers')
+  .option('--header-schema <json>', 'JSON Schema for the request headers')
   .option('-m, --method <method>', 'HTTP method override')
-  .action(async (relation: string, opts: { session: string; data?: string; templateVars?: string; method?: string }) => {
+  .option('-n, --note <text>', 'Brief description of why this step is being taken')
+  .action(async (relation: string, opts: { session: string; body?: string; bodySchema?: string; uriTemplateValues?: string; headers?: string; headerSchema?: string; method?: string; note?: string }) => {
     await followCommand(opts.session, relation, opts);
   });
 
@@ -81,6 +86,14 @@ program
   .option('--to <pos-id>', 'End position (defaults to current)')
   .action((opts: { session: string; output?: string; from?: string; to?: string }) => {
     exportCommand(opts.session, opts);
+  });
+
+program
+  .command('session-viewer')
+  .description('Serve a web UI for inspecting the session graph')
+  .requiredOption('-s, --session <file>', 'Session file path')
+  .action((opts: { session: string }) => {
+    sessionViewerCommand(opts.session);
   });
 
 program.parse();
