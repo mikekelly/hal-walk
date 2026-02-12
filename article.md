@@ -1,6 +1,6 @@
 # Progressive disclosure on the headless agentic web
 
-Years ago, when I was working on transport projects in London, the design team at TfL had a term for how they thought about signage: *phased disclosure*. You don't show a passenger the entire network map at the ticket barrier. You show them the next decision they need to make. Which line. Which direction. Which exit. Each sign reveals just enough for the next step, and the full picture assembles itself as you move through the system.
+When I was working on HAL, I came across a design principle used by the TfL design team to get the signage right in the London Underground: *phased disclosure*. The idea was to maximise the flow of travellers by not overwhelming them with information when they needed to make a decision about where to go. You don't show a passenger the entire network map at the ticket barrier. You show them the next decision they need to make. Which line. Which direction. Which exit. Each sign reveals just enough for the next step, and the full picture assembles itself as you move through the system.
 
 The web works the same way. You land on a page, you see what's available, you click a link. Each page reveals new links. You explore by following your nose, and the structure of the information space unfolds as you move through it. Progressive disclosure. The web's original interaction model.
 
@@ -14,9 +14,9 @@ Modern API integrations follow a rigid pattern: a human reads documentation, wri
 
 This is a lot of upfront knowledge to require. You need an OpenAPI spec, or a client library, or at minimum a documentation site. You study the entire surface before you write a single line. The integration assumes complete knowledge from the start.
 
-HATEOAS — Hypermedia As The Engine Of Application State — was the answer in principle. API responses should include links to related resources and available actions. The client wouldn't need hardcoded URLs because the API itself would tell it what to do next. Follow the links. Phased disclosure for machines. HAL was my attempt to make this practical: a minimal JSON format with `_links`, CURIEs for namespaced relations, and embedded resources. Enough structure for a client to navigate, without the ceremony of heavier hypermedia formats.
+The answer, in principle, was hyperlinked APIs. API responses should include links to related resources and available actions. The client wouldn't need hardcoded URLs because the API itself would tell it what to do next. Follow the links. Phased disclosure for machines. HAL was my attempt to make this practical: a minimal JSON format with `_links`, CURIEs for namespaced relations, and embedded resources. Enough structure for a client to navigate, without the ceremony of heavier hypermedia formats.
 
-It never quite worked — not because the idea was wrong, but because the clients were wrong. A traditional HTTP client encountering an unfamiliar link relation like `wiki:v1:create-page` has no way to reason about what that means, what method to use, or what data to send. It needs to know in advance. So developers wrote the same hardcoded integrations they always had. The links were in the responses, but nobody was following them. Hypermedia APIs became an architectural curiosity — technically sound, practically ignored.
+It never quite worked — not because the idea was wrong, but because the clients were wrong. A traditional HTTP client encountering an unfamiliar link relation like `wiki:v1:create-page` has no way to reason about what that means, what method to use, or what data to send. It needs to know in advance. So developers wrote the same hardcoded integrations they always had. The links were in the responses, but nobody was following them. Hyperlinked APIs became an architectural curiosity — technically sound, practically ignored.
 
 ## The new client
 

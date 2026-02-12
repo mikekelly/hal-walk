@@ -1,6 +1,6 @@
 # hal-walk
 
-A CLI tool for exploring HAL APIs through HATEOAS link-following. It records every step as a directed multigraph in a session file, which can be rendered as a diagram or exported as a deterministic path spec.
+A CLI tool for exploring hyperlinked APIs through link-following. It records every step as a directed multigraph in a session file, which can be rendered as a diagram or exported as a deterministic path spec.
 
 ## The idea
 
