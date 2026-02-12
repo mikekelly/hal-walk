@@ -43,6 +43,14 @@ export async function followCommand(
     process.exit(1);
   }
 
+  // Warn on deprecated links
+  if (link.deprecated) {
+    const msg = link.deprecation
+      ? `Warning: "${relation}" is deprecated — ${link.deprecation}`
+      : `Warning: "${relation}" is deprecated`;
+    console.error(JSON.stringify({ warning: msg }));
+  }
+
   let href = link.href;
 
   // Expand templated links

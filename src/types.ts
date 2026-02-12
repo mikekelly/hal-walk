@@ -44,6 +44,8 @@ export interface HalLink {
   title?: string;
   name?: string;
   type?: string;
+  deprecated?: boolean;
+  deprecation?: string;
 }
 
 export interface HalResponse {

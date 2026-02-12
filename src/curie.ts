@@ -60,8 +60,8 @@ export function findLink(
 /**
  * List all available link relations (excluding self and curies) from a HAL response.
  */
-export function listRelations(response: HalResponse): { relation: string; href: string; title?: string; templated?: boolean }[] {
-  const relations: { relation: string; href: string; title?: string; templated?: boolean }[] = [];
+export function listRelations(response: HalResponse): { relation: string; href: string; title?: string; templated?: boolean; deprecated?: boolean }[] {
+  const relations: { relation: string; href: string; title?: string; templated?: boolean; deprecated?: boolean }[] = [];
   for (const [key, value] of Object.entries(response._links || {})) {
     if (key === 'curies' || key === 'self') continue;
     if (Array.isArray(value)) continue;
@@ -71,6 +71,7 @@ export function listRelations(response: HalResponse): { relation: string; href: 
       href: link.href,
       title: link.title,
       templated: link.templated,
+      ...(link.deprecated ? { deprecated: true } : {}),
     });
   }
   return relations;
