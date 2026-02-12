@@ -16,9 +16,9 @@ The CLI is the bridge between these two phases. It gives the agent a structured 
 
 Traditional API clients need complete knowledge upfront — an OpenAPI spec, a client library, hardcoded URLs. hal-walk takes the opposite approach:
 
-1. `hal-walk start` — the agent sees only the root resource and its links
-2. `hal-walk describe` — the agent reads the documentation for a link relation (a markdown prompt file served by the API)
-3. `hal-walk follow` — the agent acts on what it learned
+1. `npx hal-walk start` — the agent sees only the root resource and its links
+2. `npx hal-walk describe` — the agent reads the documentation for a link relation (a markdown prompt file served by the API)
+3. `npx hal-walk follow` — the agent acts on what it learned
 4. Repeat — each response reveals new links to explore
 
 The agent never needs a complete map of the API. It discovers capabilities incrementally, just like a human clicking through a website. The difference is that every click is recorded, and the recording can be compiled into a repeatable workflow.
@@ -36,7 +36,7 @@ All commands output JSON to stdout (except `describe`, which outputs markdown, a
 ### Start a session
 
 ```bash
-hal-walk start -s session.json http://localhost:3000/
+npx hal-walk start -s session.json http://localhost:3000/
 ```
 
 Fetches the root resource, creates a session file, and stores any CURIE definitions.
@@ -44,7 +44,7 @@ Fetches the root resource, creates a session file, and stores any CURIE definiti
 ### Explore available links
 
 ```bash
-hal-walk position -s session.json
+npx hal-walk position -s session.json
 ```
 
 Shows the current position, the stored HAL response, and all available link relations.
@@ -52,7 +52,7 @@ Shows the current position, the stored HAL response, and all available link rela
 ### Read relation documentation
 
 ```bash
-hal-walk describe -s session.json wiki:create-page
+npx hal-walk describe -s session.json wiki:create-page
 ```
 
 Expands the CURIE and fetches the relation's documentation — a markdown file describing the method, input schema, and expected response. This is what the agent reads to figure out how to use a link.
@@ -61,18 +61,18 @@ Expands the CURIE and fetches the relation's documentation — a markdown file d
 
 ```bash
 # GET (default)
-hal-walk follow -s session.json wiki:pages
+npx hal-walk follow -s session.json wiki:pages
 
 # POST with data (method inferred from --data)
-hal-walk follow -s session.json wiki:create-page \
+npx hal-walk follow -s session.json wiki:create-page \
   --data '{"title": "My Page", "body": "Content here"}'
 
 # Templated link with variable expansion
-hal-walk follow -s session.json wiki:version \
+npx hal-walk follow -s session.json wiki:version \
   --template-vars '{"vid": "2"}'
 
 # Explicit method override
-hal-walk follow -s session.json wiki:edit-page \
+npx hal-walk follow -s session.json wiki:edit-page \
   --method PUT --data '{"body": "Updated content"}'
 ```
 
@@ -80,13 +80,13 @@ hal-walk follow -s session.json wiki:edit-page \
 
 ```bash
 # Jump back to a previous position (local, no HTTP request)
-hal-walk goto -s session.json p1
+npx hal-walk goto -s session.json p1
 ```
 
 ### Visualize the traversal
 
 ```bash
-hal-walk render -s session.json
+npx hal-walk render -s session.json
 ```
 
 Outputs a Mermaid diagram of the session graph:
@@ -103,8 +103,8 @@ graph LR
 ### Export a deterministic path spec
 
 ```bash
-hal-walk export -s session.json
-hal-walk export -s session.json --from p1 --to p5
+npx hal-walk export -s session.json
+npx hal-walk export -s session.json --from p1 --to p5
 ```
 
 Extracts the shortest path between two positions and outputs a declarative workflow spec:
