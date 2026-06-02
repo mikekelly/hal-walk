@@ -184,3 +184,16 @@ An LLM agent operating hal-walk doesn't need prior knowledge of the target API. 
 6. **Export** the successful path — produce a spec that preserves schemas, example data, and semantic notes
 
 The agent's inference is only needed during exploration. The exported artifact is pure data.
+
+## Agent skill
+
+This repo ships a companion **agent skill** ([`SKILL.md`](SKILL.md)) — `working-with-hal-apis` — that teaches an AI agent to drive this CLI: exploring HAL+JSON APIs by link-following, capturing the contracts it learns, and distilling recorded traversals into deterministic path specs.
+
+Install it with the [`skills`](https://github.com/vercel-labs/skills) tool:
+
+```bash
+npx skills add mikekelly/hal-walk        # add to the current project
+npx skills add mikekelly/hal-walk -g     # or install globally
+```
+
+The CLI and the skill are two halves of the same thing: install the `hal-walk` npm package for the **tool**, and the skill for the **instructions** an agent follows to use it well.
